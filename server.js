@@ -36,7 +36,7 @@ app.use("/api/notices", require("./routes/noticeRoutes")); // ✅ ONLY ONCE
 app.use("/api/timetable", require("./routes/timetableRoutes"));
 app.use("/api/library", require("./routes/libraryRoutes"));
 app.use("/api/marks", require("./routes/markRoutes"));
-app.use("/api/teacher/stats", require("./routes/teacherstatus"));
+app.use("/api/teacher/stats", require("./routes/teacherStatus"));
 app.use("/api/student", require("./routes/studentStatus"));
 
 /* ---------- ERROR HANDLER ---------- */
