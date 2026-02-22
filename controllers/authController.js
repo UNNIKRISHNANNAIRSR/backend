@@ -1,7 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
+
 const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
 const { resetOTPTemplate } = require("../utils/emailTemplate");
@@ -128,29 +128,22 @@ exports.forgotPassword = async (req, res) => {
     if (!user)
       return res.status(404).json({ msg: "User not found" });
 
-    // 🔐 Generate 6-digit OTP as STRING
+    // 🔐 Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     user.resetOTP = otp;
-    user.resetOTPExpire = Date.now() + 10 * 60 * 1000; // 10 mins
+    user.resetOTPExpire = Date.now() + 10 * 60 * 1000;
     await user.save();
 
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    await transporter.sendMail({
-      from: `"EduAI Security" <${process.env.EMAIL_USER}>`,
-      to: user.email,
-      subject: "Password Reset OTP",
-      html: resetOTPTemplate(user.name, otp),
-    });
+    // ✅ USE sendEmail FUNCTION (NOT nodemailer)
+    await sendEmail(
+      user.email,
+      "Password Reset OTP",
+      resetOTPTemplate(user.name, otp)
+    );
 
     res.json({ msg: "OTP sent successfully" });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Server error" });
