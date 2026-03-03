@@ -23,8 +23,9 @@ router.post(
         description: req.body.description,
         imageUrl: req.file?.path || null,
         cloudinaryId: req.file?.filename || null,
-        uploadedBy: req.user._id,
-        groupId: req.user.groupId,
+        uploadedBy: req.user.id,
+        collegeId: req.user.collegeId,
+        department: req.user.department, // Auto-capture department (null for admins)
       });
 
       res.status(201).json(notice);
@@ -40,7 +41,7 @@ router.post(
 router.get("/my", protect, async (req, res) => {
   try {
     const notices = await Notice.find({
-      uploadedBy: req.user._id,
+      uploadedBy: req.user.id,
     })
       .sort({ createdAt: -1 });
 
@@ -61,7 +62,7 @@ router.put(
     const notice = await Notice.findById(req.params.id);
     if (!notice) return res.status(404).json({ message: "Not found" });
 
-    if (notice.uploadedBy.toString() !== req.user._id.toString()) {
+    if (notice.uploadedBy.toString() !== req.user.id.toString()) {
       return res.status(403).json({ message: "Not allowed" });
     }
 
@@ -89,7 +90,7 @@ router.delete("/:id", protect, async (req, res) => {
   const notice = await Notice.findById(req.params.id);
   if (!notice) return res.status(404).json({ message: "Not found" });
 
-  if (notice.uploadedBy.toString() !== req.user._id.toString()) {
+  if (notice.uploadedBy.toString() !== req.user.id.toString()) {
     return res.status(403).json({ message: "Not allowed" });
   }
 
@@ -105,10 +106,18 @@ router.delete("/:id", protect, async (req, res) => {
 =========================== */
 router.get("/group", protect, async (req, res) => {
   try {
-    const notices = await Notice.find({
-      groupId: req.user.groupId,
-    })
-      .populate("uploadedBy", "name email")
+    const query = { collegeId: req.user.collegeId };
+
+    // If student or teacher, filter by department or global
+    if (req.user.role !== "admin") {
+      query.$or = [
+        { department: null },
+        { department: req.user.department }
+      ];
+    }
+
+    const notices = await Notice.find(query)
+      .populate("uploadedBy", "name email role department")
       .sort({ createdAt: -1 });
 
     res.json(notices);

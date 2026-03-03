@@ -28,7 +28,7 @@ router.post(
       // Check if timetable already exists
       const existing = await Timetable.findOne({
         semester,
-        groupId: req.user.groupId,
+        collegeId: req.user.collegeId,
       });
 
       // If exists → delete old file
@@ -42,8 +42,8 @@ router.post(
         semester,
         description,
         fileUrl: `/uploads/timetable/${req.file.filename}`,
-        uploadedBy: req.user._id,
-        groupId: req.user.groupId,
+        uploadedBy: req.user.id,
+        collegeId: req.user.collegeId,
       });
 
       await timetable.save();
@@ -71,7 +71,7 @@ router.get("/", protect, async (req, res) => {
 
     const timetable = await Timetable.findOne({
       semester,
-      groupId: req.user.groupId,
+      collegeId: req.user.collegeId,
     }).populate("uploadedBy", "name email");
 
     if (!timetable) {
@@ -95,7 +95,7 @@ router.delete("/:id", protect, async (req, res) => {
       return res.status(404).json({ message: "Not found" });
     }
 
-    if (timetable.uploadedBy.toString() !== req.user._id.toString()) {
+    if (timetable.uploadedBy.toString() !== req.user.id.toString()) {
       return res.status(403).json({ message: "Not allowed" });
     }
 

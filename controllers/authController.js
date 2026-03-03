@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const College = require("../models/College");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -15,13 +16,33 @@ const {
 // ================= SIGNUP =================
 exports.signup = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
-
+    const { name, email, password, role, adminSecret, teacherAuthCode, designation } = req.body;
     if (!name || !email || !password || !role) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    const existingUser = await User.findOne({ email });
+    const normalizedEmail = email.toLowerCase().trim();
+
+    if (role === "admin" && adminSecret !== process.env.ADMIN_SECRET) {
+      return res.status(403).json({ message: "Invalid Admin Secret Code" });
+    }
+
+    if (role === "teacher") {
+      if (!teacherAuthCode) {
+        return res.status(400).json({ message: "Teacher Authorization Code is required" });
+      }
+
+      const college = await College.findOne({ teacherAuthCode: teacherAuthCode.trim() });
+      if (!college) {
+        return res.status(404).json({ message: "Invalid Teacher Authorization Code" });
+      }
+
+      if (!college.isTeacherRegistrationEnabled) {
+        return res.status(403).json({ message: "Teacher registration is currently disabled by the college admin" });
+      }
+    }
+
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
@@ -30,9 +51,10 @@ exports.signup = async (req, res) => {
 
     const user = await User.create({
       name,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
       role,
+      designation: role === "teacher" ? designation : null,
     });
 
     const token = jwt.sign(
@@ -63,6 +85,13 @@ exports.signup = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        collegeId: user.collegeId,
+        department: user.department,
+        semester: user.semester,
+        teachingSemester: user.teachingSemester || [],
+        registerNumber: user.registerNumber,
+        designation: user.designation,
+        isProfileComplete: user.isProfileComplete,
       },
     });
   } catch (error) {
@@ -76,8 +105,9 @@ exports.login = async (req, res) => {
   console.log("LOGIN BODY RECEIVED:", req.body); // 🔥 debug
   try {
     const { email, password } = req.body;
+    const normalizedEmail = email.toLowerCase().trim();
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -112,6 +142,14 @@ exports.login = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        collegeId: user.collegeId,
+        department: user.department,
+        semester: user.semester,
+        teachingSemester: user.teachingSemester || [],
+        registerNumber: user.registerNumber,
+        rollNo: user.rollNo,
+        designation: user.designation,
+        isProfileComplete: user.isProfileComplete,
       },
     });
   } catch (error) {

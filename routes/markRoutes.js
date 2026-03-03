@@ -6,7 +6,8 @@ const {
   uploadMarks,
   getTeacherMarks,
   getStudentMarks,
-  deleteMark
+  deleteMark,
+  uploadClassInternals
 } = require("../controllers/markController");
 
 // Teacher uploads / updates marks
@@ -20,14 +21,22 @@ router.get("/my", protect, getStudentMarks);
 
 router.delete("/:id", protect, deleteMark);
 
+// 📌 NEW: Fetch previously used subjects for a teacher
+router.get("/subjects/:semester", protect, require("../controllers/markController").getTeacherSubjects);
 
-// Teacher: get marks of one student for a semester
+// 📌 NEW: Teacher bulk uploads continuous evaluation grid
+router.post("/bulk-internals", protect, uploadClassInternals);
+
+router.post("/bulk", protect, require("../controllers/markController").bulkUpsert);
+router.put("/bulk", protect, require("../controllers/markController").bulkUpsert);
+router.delete("/bulk", protect, require("../controllers/markController").bulkDelete);
+router.get("/table/:semester", protect, require("../controllers/markController").getMarksTable);// Teacher: get marks of one student for a semester
 router.get("/student/:studentId/:semester", protect, async (req, res) => {
   try {
     const marks = await require("../models/Mark").find({
       student: req.params.studentId,
       semester: req.params.semester,
-      groupId: req.user.groupId,
+      collegeId: req.user.collegeId,
       department: req.user.department,
     });
 

@@ -38,7 +38,7 @@ const markSchema = new mongoose.Schema(
 
     examType: {
       type: String,
-      enum: ["Series 1", "Series 2", "Internal", "Assignment 1","Assignment 2","Main Exam"],
+      enum: ["Series 1", "Series 2", "Internal", "Assignment 1", "Assignment 2", "Main Exam"],
       required: true,
     },
 
@@ -55,9 +55,9 @@ const markSchema = new mongoose.Schema(
       default: null,
     },
 
-    groupId: {
+    collegeId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Group",
+      ref: "College",
       required: true,
     },
   },

@@ -24,10 +24,13 @@ const noticeSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-
-    groupId: {
+    department: {
+      type: String,
+      default: null, // null means global/college-wide
+    },
+    collegeId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Group",
+      ref: "College",
       required: true,
     },
   },

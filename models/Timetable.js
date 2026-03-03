@@ -22,9 +22,9 @@ const timetableSchema = new mongoose.Schema(
       required: true,
     },
 
-    groupId: {
+    collegeId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Group",
+      ref: "College",
       required: true,
     },
   },

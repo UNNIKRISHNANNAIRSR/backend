@@ -30,22 +30,33 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 /* ---------- ROUTES ---------- */
 app.use("/api/auth", require("./routes/authRoutes"));
-app.use("/api/group", require("./routes/group"));
+app.use("/api/college", require("./routes/collegeRoutes"));
 app.use("/api/notes", require("./routes/noteRoutes"));
 app.use("/api/notices", require("./routes/noticeRoutes")); // ✅ ONLY ONCE
 app.use("/api/timetable", require("./routes/timetableRoutes"));
 app.use("/api/library", require("./routes/libraryRoutes"));
 app.use("/api/marks", require("./routes/markRoutes"));
+app.use("/api/subjects", require("./routes/subjectRoutes"));
 app.use("/api/teacher/stats", require("./routes/teacherStatus"));
 app.use("/api/student", require("./routes/studentStatus"));
 
 /* ---------- ERROR HANDLER ---------- */
 app.use((err, req, res, next) => {
-  console.error("❌ ERROR:", err.message);
+  console.error("❌ ERROR STACK:", err.stack || err);
   res.status(err.status || 500).json({
     success: false,
     message: err.message || "Server Error",
   });
+});
+
+/* ---------- PROCESS RELIABILITY ---------- */
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("🚨 UNHANDLED REJECTION:", reason);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("🔥 UNCAUGHT EXCEPTION:", err);
+  // Optional: process.exit(1) if you want to force a restart in production
 });
 
 /* ---------- SERVER ---------- */

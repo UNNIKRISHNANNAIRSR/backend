@@ -48,7 +48,7 @@ router.post(
 
         cloudinaryId: req.file.public_id,
 
-        uploadedBy: req.user._id,
+        uploadedBy: req.user.id,
       });
 
       res.status(201).json(book);
@@ -75,7 +75,7 @@ router.get("/", protect, getLibrary);
 ================================ */
 router.get("/my", protect, async (req, res) => {
   const books = await Library.find({
-    uploadedBy: req.user._id,
+    uploadedBy: req.user.id,
   }).sort({ createdAt: -1 });
 
   res.json(books);
@@ -88,7 +88,7 @@ router.get("/:id", protect, async (req, res) => {
   const book = await Library.findById(req.params.id);
   if (!book) return res.status(404).json({ message: "Not found" });
 
-  if (book.uploadedBy.toString() !== req.user._id.toString()) {
+  if (book.uploadedBy.toString() !== req.user.id.toString()) {
     return res.status(403).json({ message: "Not allowed" });
   }
 
@@ -107,7 +107,7 @@ router.put(
       const item = await Library.findById(req.params.id);
       if (!item) return res.status(404).json({ message: "Not found" });
 
-      if (item.uploadedBy.toString() !== req.user._id.toString()) {
+      if (item.uploadedBy.toString() !== req.user.id.toString()) {
         return res.status(403).json({ message: "Not allowed" });
       }
 
@@ -158,7 +158,7 @@ router.delete("/:id", protect, async (req, res) => {
     const item = await Library.findById(req.params.id);
     if (!item) return res.status(404).json({ message: "Not found" });
 
-    if (item.uploadedBy.toString() !== req.user._id.toString()) {
+    if (item.uploadedBy.toString() !== req.user.id.toString()) {
       return res.status(403).json({ message: "Not allowed" });
     }
 

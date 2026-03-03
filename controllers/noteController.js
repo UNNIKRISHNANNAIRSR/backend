@@ -1,5 +1,17 @@
 // exports.uploadNote = async (req, res) => {
 //   try {
+//     // only teacher can upload
+//     if (req.user.role !== "teacher") {
+//       return res
+//         .status(403)
+//         .json({ message: "Only teachers can upload notes" });
+//     }
+
+//     // user must be in a group
+//     if (!req.user.collegeId) {
+//       return res.status(400).json({ message: "Join a group first" });
+//     }
+
 //     if (!req.file) {
 //       return res.status(400).json({ message: "File not uploaded" });
 //     }
@@ -7,11 +19,14 @@
 //     const note = await Note.create({
 //       title: req.body.title,
 //       description: req.body.description,
-//       semester: req.body.semester,
-//       department: req.body.department,
+
+//       // take trusted values from logged-in user
+//       semester: req.user.semester,
+//       department: req.user.department,
+
 //       fileUrl: `/uploads/notes/${req.file.filename}`,
 //       uploadedBy: req.user.id,
-//       groupId: req.user.groupId,
+//       collegeId: req.user.collegeId,
 //     });
 
 //     res.status(201).json({

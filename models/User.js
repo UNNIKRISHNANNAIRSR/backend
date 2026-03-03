@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["teacher", "student"],
+      enum: ["teacher", "student", "admin"],
       required: true,
     },
 
@@ -30,26 +30,42 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
 
+    designation: {
+      type: String,
+      default: null,
+    },
+
     semester: {
       type: String,
       default: null,
     },
 
+    teachingSemester: {
+      type: [Number],
+      default: [],
+    },
+
     rollNo: {
-      type: Number,
-      default: null,
-    },
-
-    // 🔹 GROUP / COLLEGE ISOLATION
-    groupId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Group",
-      default: null,
-    },
-
-    groupCode: {
       type: String,
       default: null,
+    },
+
+    registerNumber: {
+      type: String,
+      default: null,
+    },
+
+    // 🔹 COLLEGE ISOLATION
+    collegeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "College",
+      default: null,
+    },
+
+    // 🔹 PROFILE SETUP TRACKER
+    isProfileComplete: {
+      type: Boolean,
+      default: false,
     },
 
     // ✅ OTP PASSWORD RESET (ADDED ONLY)

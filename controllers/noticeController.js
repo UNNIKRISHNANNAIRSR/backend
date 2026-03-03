@@ -6,17 +6,21 @@ const cloudinary = require("cloudinary").v2;
 ================================ */
 exports.createNotice = async (req, res) => {
   try {
-    const { title, description, group } = req.body;
+    const { title, description } = req.body;
 
-    if (!title || !description || !group) {
+    if (!title || !description) {
       return res.status(400).json({ message: "Missing fields" });
+    }
+
+    if (!req.user.collegeId) {
+      return res.status(400).json({ message: "User must be part of a college" });
     }
 
     const notice = new Notice({
       title,
       description,
-      group,
-      sentBy: req.user._id,
+      collegeId: req.user.collegeId,
+      sentBy: req.user.id,
     });
 
     if (req.file) {
@@ -38,9 +42,7 @@ exports.createNotice = async (req, res) => {
 ================================ */
 exports.getGroupNotices = async (req, res) => {
   try {
-    const { group } = req.query;
-
-    const notices = await Notice.find({ group })
+    const notices = await Notice.find({ collegeId: req.user.collegeId })
       .populate("sentBy", "name role")
       .sort({ createdAt: -1 });
 
@@ -59,7 +61,7 @@ exports.deleteNotice = async (req, res) => {
 
     if (!notice) return res.status(404).json({ message: "Not found" });
 
-    if (notice.sentBy.toString() !== req.user._id.toString()) {
+    if (notice.sentBy.toString() !== req.user.id.toString()) {
       return res.status(403).json({ message: "Not allowed" });
     }
 

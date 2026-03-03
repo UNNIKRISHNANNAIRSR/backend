@@ -45,10 +45,10 @@ const librarySchema = new mongoose.Schema(
       required: true,
     },
 
-    // 🔒 Group isolation
-    groupId: {
+    // 🔒 College isolation
+    collegeId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Group",
+      ref: "College",
       default: null,
     },
   },

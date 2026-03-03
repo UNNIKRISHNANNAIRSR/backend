@@ -16,7 +16,7 @@ exports.uploadLibraryFile = async (req, res) => {
       type: "file",
       fileUrl: req.file.path,          // ✅ PREVIEW URL
       cloudinaryId: req.file.public_id, // ✅ CORRECT ID
-      uploadedBy: req.user._id,
+      uploadedBy: req.user.id,
     });
 
     res.status(201).json(book);
@@ -42,7 +42,7 @@ exports.addLibraryUrl = async (req, res) => {
       description,
       type: "url",
       externalUrl,
-      uploadedBy: req.user._id,
+      uploadedBy: req.user.id,
     });
 
     res.status(201).json(book);
@@ -70,7 +70,7 @@ exports.deleteLibrary = async (req, res) => {
     const book = await Library.findById(req.params.id);
     if (!book) return res.status(404).json({ message: "Not found" });
 
-    if (book.uploadedBy.toString() !== req.user._id.toString()) {
+    if (book.uploadedBy.toString() !== req.user.id.toString()) {
       return res.status(403).json({ message: "Not allowed" });
     }
 
@@ -96,7 +96,7 @@ exports.updateLibrary = async (req, res) => {
     const book = await Library.findById(req.params.id);
     if (!book) return res.status(404).json({ message: "Not found" });
 
-    if (book.uploadedBy.toString() !== req.user._id.toString()) {
+    if (book.uploadedBy.toString() !== req.user.id.toString()) {
       return res.status(403).json({ message: "Not allowed" });
     }
 
